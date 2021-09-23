@@ -157,15 +157,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-# Interesting findings
-# The y "feet" had negative values. Unsure how that would be represented in real life.
-# If x "feet" had negative values, then y having possible negs would be understandable
-
-# It's clear from a height of ~129 -> 224 inches that issues were had with getting measurements
-
-
-# Initially I figured something was wrong with my coding for areas that needed manual review,
-# but after looking at the volume of data that was marked as
-# not considered valid, it made sense.
-# I'm surprised by how well weak sections were masked by a heat map that didn't average out the bottom 10.
