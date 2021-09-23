@@ -55,7 +55,7 @@ def make_heatmap(df, x, y, key, m_cmap='brg'):
     ax = sns.heatmap(table, cmap=m_cmap)
     ax.invert_yaxis()
     ax.set_title(f'{key} Heat Map')
-    ax.figure.savefig(f'{key}_heatmap.png')
+    ax.figure.savefig(f'plots/{key}_heatmap.png')
     return ax
 
 
@@ -71,7 +71,7 @@ def make_heatmap_special(df, x, y, key, color_dict):
     n = len(color_dict)
     colorbar.set_ticks([colorbar.vmin + r / n * (0.5 + i) for i in range(n)])
     colorbar.set_ticklabels(list(color_dict.values()))
-    ax.figure.savefig(f'{key}_heatmap.png')
+    ax.figure.savefig(f'plots/{key}_heatmap.png')
     return ax
 
 
