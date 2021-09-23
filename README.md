@@ -1,4 +1,4 @@
-# DigesterFlexTape
+# DigesterFlexTape - Nicholas Dugal
 Take home for Gecko Robotics
 
 
