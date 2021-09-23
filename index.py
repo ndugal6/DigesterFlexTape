@@ -140,9 +140,9 @@ min_remaining_life_heat = make_heatmap(aggregated, 'binx', 'biny', 'remaining_li
 aggregated['simple_life'] = aggregated.apply(map_state_to_number, axis=1)
 
 color_dict = {
-    "yellow": "needs manual follow up",
+    "yellow": "needs manual\n follow up",
     "red": "needs repair",
-    "green": "life >= 6 months"
+    "green": "life >= \n6 months"
 }
 
 min_remaining_life_heat = make_heatmap_special(aggregated, 'binx', 'biny', 'simple_life', color_dict)
@@ -158,3 +158,10 @@ remaining_thickness_heat = make_heatmap(aggregated, 'binx', 'biny', 'remaining_t
 # If x "feet" had negative values, then y having possible negs would be understandable
 
 # It's clear from a height of ~129 -> 224 inches that issues were had with getting measurements
+
+
+# Initially I figured something was wrong with my coding for areas that needed manual review,
+# but after looking at the volume of data that was marked as
+# not considered valid, it made sense.
+# I'm surprised by how well weak sections were masked by a heat map that didn't average out the bottom 10.
+
