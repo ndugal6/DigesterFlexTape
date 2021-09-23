@@ -80,7 +80,7 @@ def make_scatter_plot(df, x, y, c, colormap='viridis'):
     plt.clf()
     df.plot.scatter(x=x, y=y, c=c, colormap=colormap)
     plt.title('Colored scatter of thickness (inches)')
-    plt.savefig(f'scatter_plot_{c}.png')
+    plt.savefig(f'plots/scatter_plot_{c}.png')
     return plt
 
 
