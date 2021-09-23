@@ -4,7 +4,7 @@ import math
 import seaborn as sns
 from matplotlib.colors import ListedColormap
 
-plt.figure(figsize=(15,15))
+plt.figure(figsize=(15, 15))
 
 mm_to_inch = lambda x: x / 25.4
 
@@ -58,6 +58,7 @@ def make_heatmap(df, x, y, key, m_cmap='brg'):
     ax.figure.savefig(f'{key}_heatmap.png')
     return ax
 
+
 def make_heatmap_special(df, x, y, key, color_dict):
     plt.clf()
     table = df.pivot(y, x, key)  # seems backwards but its a pivot
@@ -103,7 +104,8 @@ def group_data_by_steps(df, step_size=BIN_STEP_SIZE, bache_size=None):
 
 
 def agg_data(df):
-    aggregrated = df.groupby(['binx', 'biny']).agg({'thickness': ['min'], 'remaining_life': ['min', 'count'], 'remaining_thickness': ['mean']})
+    aggregrated = df.groupby(['binx', 'biny']).agg(
+        {'thickness': ['min'], 'remaining_life': ['min', 'count'], 'remaining_thickness': ['mean']})
     aggregrated.columns = aggregrated.columns.map('_'.join)
     aggregrated.reset_index(level=['binx', 'biny'], inplace=True)
     aggregrated.rename(columns={'remaining_life_count': 'count'}, inplace=True)
@@ -113,45 +115,48 @@ def agg_data(df):
 def map_state_to_number(row):
     if row['count'] < 10:
         return 1
-    elif row.remaining_life_min < 0.5: #since remaining life is in years, 0.5 represents half year
+    elif row.remaining_life_min < 0.5:  # since remaining life is in years, 0.5 represents half year
         return 2
     return 3
 
 
-raw_data = pd.read_csv('data/thickness_data.csv')
-remove_invalids(raw_data)
-convert_to_inches(raw_data)
-add_thickness_min(raw_data)
-add_remaining_thickness(raw_data)
-add_remaining_life(raw_data)
-thick_scatter_plot = make_scatter_plot(raw_data, 'x', 'y', 'thickness')
+def main():
+    raw_data = pd.read_csv('data/thickness_data.csv')
+    remove_invalids(raw_data)
+    convert_to_inches(raw_data)
+    add_thickness_min(raw_data)
+    add_remaining_thickness(raw_data)
+    add_remaining_life(raw_data)
+    thick_scatter_plot = make_scatter_plot(raw_data, 'x', 'y', 'thickness')
 
-binned_df = group_data_by_steps(raw_data, BIN_STEP_SIZE)
+    binned_df = group_data_by_steps(raw_data, BIN_STEP_SIZE)
 
-aggregated = agg_data(binned_df)
+    aggregated = agg_data(binned_df)
+
+    count_heat = make_heatmap(aggregated, 'binx', 'biny', 'count')
+    min_thickness_heat = make_heatmap(aggregated, 'binx', 'biny', 'thickness_min')
+    aggregated['remaining_life_min'] = aggregated['remaining_life_min'].clip(
+        lower=0)  # replace all negs with 0. If it's at the end of it's life, then its at the end
+    min_remaining_life_heat = make_heatmap(aggregated, 'binx', 'biny', 'remaining_life_min')
+
+    aggregated['simple_life'] = aggregated.apply(map_state_to_number, axis=1)
+
+    color_dict = {
+        "yellow": "needs manual\n follow up",
+        "red": "needs repair",
+        "green": "life >= \n6 months"
+    }
+
+    min_remaining_life_heat = make_heatmap_special(aggregated, 'binx', 'biny', 'simple_life', color_dict)
+
+    raw_data.sort_values(by='remaining_thickness', inplace=True)
+    binned_df = group_data_by_steps(raw_data, BIN_STEP_SIZE, BATCH_SIZE)
+    aggregated = agg_data(binned_df)
+    remaining_thickness_heat = make_heatmap(aggregated, 'binx', 'biny', 'remaining_thickness_mean')
 
 
-count_heat = make_heatmap(aggregated, 'binx', 'biny', 'count')
-min_thickness_heat = make_heatmap(aggregated, 'binx', 'biny', 'thickness_min')
-aggregated['remaining_life_min'] = aggregated['remaining_life_min'].clip(lower=0)  # replace all negs with 0. If it's at the end of it's life, then its at the end
-min_remaining_life_heat = make_heatmap(aggregated, 'binx', 'biny', 'remaining_life_min')
-
-
-aggregated['simple_life'] = aggregated.apply(map_state_to_number, axis=1)
-
-color_dict = {
-    "yellow": "needs manual\n follow up",
-    "red": "needs repair",
-    "green": "life >= \n6 months"
-}
-
-min_remaining_life_heat = make_heatmap_special(aggregated, 'binx', 'biny', 'simple_life', color_dict)
-
-raw_data.sort_values(by='remaining_thickness', inplace=True)
-binned_df = group_data_by_steps(raw_data, BIN_STEP_SIZE, BATCH_SIZE)
-aggregated = agg_data(binned_df)
-remaining_thickness_heat = make_heatmap(aggregated, 'binx', 'biny', 'remaining_thickness_mean')
-
+if __name__ == '__main__':
+    main()
 
 # Interesting findings
 # The y "feet" had negative values. Unsure how that would be represented in real life.
@@ -164,4 +169,3 @@ remaining_thickness_heat = make_heatmap(aggregated, 'binx', 'biny', 'remaining_t
 # but after looking at the volume of data that was marked as
 # not considered valid, it made sense.
 # I'm surprised by how well weak sections were masked by a heat map that didn't average out the bottom 10.
-
